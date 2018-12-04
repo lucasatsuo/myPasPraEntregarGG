@@ -1,1 +1,3 @@
-aoba; begin end. 
+program aoba; 
+var a, b, c : integer ;
+begin end. 

@@ -20,38 +20,38 @@ mypas input.pas -o saida
 */
 
 #include <mypas.h>
+#include <getopt.h>
 
 void main(int argc, char *argv[]){
-	char **inputName, **outputName;
-	FILE *input, *output;
+	char nomeOutput[50] = "a", *nomeInput = NULL;
+	int opt = 0;
 
-	if(argc<2){
-		printf("Nao ha arquivos de entrada .. Finalizando\n");
+	if(argc < 2){
+		fprintf(stderr, "Nao ha arquivos de entrada .. Finalizando\n");
 		exit(0);
-	}else{
-		inputName = &argv[1];
-		if(input = fopen(*inputName, "r") ){
+	}
 
-		}else{
-			printf("Nao foi possivel abrir %s .. Finalizando", *inputName);
-			exit(0);
-		}
-		if(strcmp(argv[2],"-o") == 0){
-			if(argc>3){
-				outputName = &argv[3];
-				if((output = fopen(strcat(*outputName,".o"), "w+"))==NULL){
-					printf("Erro ao criar o arquivo objeto .. Finalizando\n");
-					exit(0);
-				}
-			}
-		}else{
+	while( (opt = getopt(argc, argv, "o:")) > 0 ) {
+		switch(opt){
+			case 'o': strcpy(nomeOutput,optarg);
 		}
 	}
 
+	if ( argv[optind] != NULL ) {
+		nomeInput = argv[optind];
+	}
+
+	if( (source = fopen(nomeInput, "r")) == NULL){
+		fprintf(stderr, "Falha ao abrir %s .. Finalizando\n", nomeInput);
+		exit(0);
+	}
 
 
-	source = stdin;
-	object = stdout;
+	if( (object = fopen(strcat(nomeOutput,".o"), "w+")) == NULL){
+		fprintf(stderr, "Falha ao criar arquivo objeto .. Finalizando\n");
+		exit(0);
+	}
+
 	lookahead = gettoken(source);
 	mypas();
 }
