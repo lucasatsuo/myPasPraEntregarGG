@@ -8,7 +8,7 @@
 #include <interface.h>
 #include <pseudocode.h>
 
-size_t loopcount = 1;
+// size_t loopcount = 1;
 #define loopalloc loopcount++
 extern FILE *source;
 
@@ -33,7 +33,7 @@ void stmt(void);
 void ifstmt(void);
 int expr(void);
 int smpexpr(int);
-int factor(void);
+int factor(int);
 void exprlist(void);
 void whlstmt(void);
 void repstmt(void);

@@ -41,15 +41,15 @@ void push(int regtype){
 	}
 	fprintf(object,"\tpush %%acc%s\n", suffix);
 }
-void pop(int regtype){
-	char *suffix;
-	switch(regtype){
-		case 1: suffix = "l"; break;
-		case 2: suffix = "f"; break;
-		case 3: suffix = "df"; break;
-		case 4: suffix = "b";
-	}
-	fprintf(object,"\tpop %%acc%s\n", suffix);
+void pop(char *regtype){ // tem que ser resolvido
+	// char *suffix;
+	// switch(regtype){
+	// 	case 1: suffix = "l"; break;
+	// 	case 2: suffix = "f"; break;
+	// 	case 3: suffix = "df"; break;
+	// 	case 4: suffix = "b";
+	// }
+	fprintf(object,"\tpop %%acc%s\n", regtype);
 }
 void store(char *varoffset, char *suffix){
 	fprintf(object, "\tmov %%acc%s, %s\n", suffix, varoffset);
@@ -86,7 +86,7 @@ void orb(void){ /* OR binary*/
 void imul(void){
 	fprintf(object, "\timull %%accl, (%%spl)\n");
 }
-void idiv(void, char *rmdr){ /* dest / src , rmdr remainder*/
+void idiv(void){ /* dest / src , rmdr remainder*/ // precisa ser resolvido, antes// char *rmdr 
 	fprintf(object, "\tidivl %%accl, (%%spl)\n");
 }
 void fmul(void){
@@ -211,7 +211,7 @@ int macrobinary(int op, int oprndtype){
 	return 0;
 }
 
-int macrounary(int op, int oprndtype){
+int macrounary(int oprndtype){
 	switch(oprndtype){
 		case 1:
 			ineg(); break;
