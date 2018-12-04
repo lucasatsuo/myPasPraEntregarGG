@@ -13,4 +13,6 @@ iscompat(), mintype() - se ainda tiver - , e mais os que faltarem
 
 tem que arrumar o funcionamento do smpexpr()
 
+adicionar o dicionario de tokens pra arrumar a mostragem de erro dos tokens
+
 se pá é isso.
