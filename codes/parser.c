@@ -198,7 +198,7 @@ stmt ->   body
 | ifstmt
 | whlstmt
 | repstmt
-| smpexpr
+| mpexpr
 | <empty>
 ***************************************************************************/
 void stmt(void){
@@ -221,8 +221,8 @@ void stmt(void){
             switch(lookahead){ /* abstrai FIRST(smpexpr) */
                 case '+': case '-': case NOT: // unary operators
                 case '(': case ID: case UINT: case FLTP:
-                case TRUE: case FALSE:
-                    smpexpr();
+		case TRUE: case FALSE:
+                    smpexpr(0);
                 break;
                 default:
                     ;
@@ -309,10 +309,10 @@ oldtype
 int haserror = 0;
 int smpexpr(int inhertype){
     /**/int isunary =/**/ unaryop();
-    /**/int negation = isunary(); if(negation == '+') negation=0;
-    /**/int typematch = iscompatop(isneg, inhertype)/**/;
+    /**/int negation = isunary; if(negation == '+') negation=0;
+    /**/int typematch = iscompatop(negation, inhertype)/**/;
 
-    /**/int mintype = getmintype(isneg); /**/
+    /**/int mintype = getmintype(negation); /**/
 
     /**/int currtype = promote(inhertype,mintype); // pode ser que tenha havido uma promocao
     /* Estas flags sao usadas para aproximar a visualizacao do codigo
@@ -424,20 +424,23 @@ factor ->   ID [ ASGN expr | ( exprlist ) ]
   | FALSE
   | ( expr )
 ***************************************************************************/
-int factor(void)
+int factor(int inherited_t)
 {
+    int actual_t;
     /* Dentro de factor que sera feita a identificacao das variaveis e constantes */
-    switch (lookahead) {
+    switch (lookahead){
         case ID:
         match(ID);
             if(lookahead == ASGN){
                 match(ASGN);
                 expr();
+		actual_t = 4;
             } else if(lookahead == '(') {
                 match('(');
                 exprlist();
                 match(')');
             }
+	    return actual_t;
             break;
         case UINT:
         case FLTP:

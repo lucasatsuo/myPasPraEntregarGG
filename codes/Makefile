@@ -18,8 +18,10 @@ cfiles=\
 		lexer.c\
 		parser.c\
 		keywords.c\
-		interface.c
-		
+		interface.c\
+		pseudocodec\
+		symtab.c
+
 ofiles=\
        mypas.o\
        lexer.o\
