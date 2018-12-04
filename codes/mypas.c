@@ -7,11 +7,51 @@
 * 07/11/2018
 *
 */
-#include <mypas.h>
 
-void main(void){
-	source = stdin;
-	object = stdout;
+/*
+mypas input.pas [ -o output ]
+
+mypas input.pas
+ >> cria a.o
+
+mypas input.pas -o saida
+ >> cria saida.o
+
+*/
+
+#include <mypas.h>
+#include <getopt.h>
+
+void main(int argc, char *argv[]){
+	char nomeOutput[50] = "a", *nomeInput = NULL;
+	int opt = 0;
+
+	if(argc < 2){
+		fprintf(stderr, "Nao ha arquivos de entrada .. Finalizando\n");
+		exit(0);
+	}
+
+	while( (opt = getopt(argc, argv, "o:")) > 0 ) {
+		switch(opt){
+			case 'o': strcpy(nomeOutput,optarg);
+		}
+	}
+
+	if ( argv[optind] != NULL ) {
+		nomeInput = argv[optind];
+	}
+
+	if( (source = fopen(nomeInput, "r")) == NULL){
+		fprintf(stderr, "Falha ao abrir %s .. Finalizando\n", nomeInput);
+		exit(0);
+	}
+
+
+	if( (object = fopen(strcat(nomeOutput,".o"), "w+")) == NULL){
+		fprintf(stderr, "Falha ao criar arquivo objeto .. Finalizando\n");
+		exit(0);
+	}
+
 	lookahead = gettoken(source);
 	mypas();
 }

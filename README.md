@@ -7,7 +7,7 @@ TODO LIST
 
 [ok] versão compilável do compilador (remoção dos erros de compilação)
 
-[  ] tem que fazer a entrada de arquivos, argc, argv e pá
+[ok] tem que fazer a entrada de arquivos, argc, argv e pá
 
 [  ] tem que arrumar as macros, pra parte de geração (ação semantica)
 macros estão no pseudocode
