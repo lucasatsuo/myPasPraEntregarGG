@@ -219,6 +219,8 @@ int macrounary(int oprndtype){
 			fneg(); break;
 		case 3:
 			dfneg(); break;
+		case 4:
+			notb(); break;
 		default:
 			return -1;
 	}

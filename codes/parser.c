@@ -280,7 +280,6 @@ int getmintype(int op){
     int mintype=0;
     switch(mintype){
         case '+':
-
         case '-':
             mintype = 1; break;
         case NOT:
@@ -289,7 +288,7 @@ int getmintype(int op){
     return mintype;
 }
 
-int unaryop(void){
+int unaryop(void){ 
 
 }
 
@@ -304,6 +303,39 @@ int promote(int oldtype, int newtype){
 4| -1 -2 -2 -2  4
 oldtype
 */
+    switch(oldtype){
+        case 0:
+            return newtype;
+        case 1:
+            switch(newtype){
+                case 0: return -1;
+                case 1: return 1;
+                case 2: return 2;
+                case 3: return 3;
+                case 4: return -2;
+            }
+        case 2:
+            switch(newtype){
+                case 0: return -1;
+                case 1: return 1;
+                case 2: return 2;
+                case 3: return 3;
+                case 4: return -2;
+            }
+        case 3:
+            switch(newtype){
+                case 0: return -1;
+                case 1: case 2: case 3: return 3;
+                case 4: return -2;
+            }
+        case 4:
+            switch(newtype){
+                case 0: return -1;
+                case 1: case 2: case 3: return -2;
+                case 4: return 4;
+            }
+    }
+    return -2;
 }
 
 int haserror = 0;
