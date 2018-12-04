@@ -198,7 +198,7 @@ stmt ->   body
 | ifstmt
 | whlstmt
 | repstmt
-| mpexpr
+| smpexpr
 | <empty>
 ***************************************************************************/
 void stmt(void){
