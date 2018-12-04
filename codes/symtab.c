@@ -33,6 +33,6 @@ size_t symtab_append(const char *newentry, int type){
 		return 0;
 	i = symtab_nextentry++;
 	strcpy(symtab[i].objname, newentry);
-	symtab.type = type;
+	symtab->type = type;
 	return i;
 }

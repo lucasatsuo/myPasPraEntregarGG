@@ -1,6 +1,6 @@
 /**@<parser.c>::**/
 #include <parser.h>
-
+size_t loopcount = 1;
 /***************************************************************************
 
 Definicoes sintaticas para uma versao simplificada de um compilador Pascal.
@@ -221,8 +221,8 @@ void stmt(void){
             switch(lookahead){ /* abstrai FIRST(smpexpr) */
                 case '+': case '-': case NOT: // unary operators
                 case '(': case ID: case UINT: case FLTP:
-                case TRUE: case FALSE:
-                    smpexpr();
+		case TRUE: case FALSE:
+                    smpexpr(0);
                 break;
                 default:
                     ;
@@ -308,11 +308,12 @@ oldtype
 
 int haserror = 0;
 int smpexpr(int inhertype){
+    int syntype=0; // tem que ser resolvido
     /**/int isunary =/**/ unaryop();
-    /**/int negation = isunary(); if(negation == '+') negation=0;
-    /**/int typematch = iscompatop(isneg, inhertype)/**/;
+    /**/int negation = isunary; if(negation == '+') negation=0;
+    /**/int typematch = iscompatop(negation, inhertype)/**/;
 
-    /**/int mintype = getmintype(isneg); /**/
+    /**/int mintype = getmintype(negation); /**/
 
     /**/int currtype = promote(inhertype,mintype); // pode ser que tenha havido uma promocao
     /* Estas flags sao usadas para aproximar a visualizacao do codigo
@@ -357,7 +358,7 @@ int smpexpr(int inhertype){
     if( otimes == '*' || otimes == '/' || otimes == AND || 
         otimes == DIV || otimes == MOD) {
         /**/typematch = iscompatop(otimes, syntype);/**/
-        /**/currenttype = promote(currenttype,factor_t);/**/ // tem que testar o valor de promote retornado
+        /**/currtype = promote(currtype,factor_t);/**/ // tem que testar o valor de promote retornado
         match(otimes);
         goto F_begin;
     }
@@ -366,7 +367,7 @@ int smpexpr(int inhertype){
     if( oplus == '+' || oplus == '-' || oplus == OR) {
         /**/typematch = iscompatop(oplus, syntype);/**/
         match(oplus);
-        goto F_begin
+        goto F_begin;
     }
 
     switch(oplus){ // essa verificacao tem que ser feita sempre entra no if(otimes) ou if(oplus)
@@ -377,7 +378,7 @@ int smpexpr(int inhertype){
             syntype = 1;
             break;
         case OR:
-            match(oplus)
+            match(oplus);
             syntype = 4;
             break;
     }
@@ -424,20 +425,23 @@ factor ->   ID [ ASGN expr | ( exprlist ) ]
   | FALSE
   | ( expr )
 ***************************************************************************/
-int factor(void)
+int factor(int inherited_t)
 {
+    int actual_t;
     /* Dentro de factor que sera feita a identificacao das variaveis e constantes */
-    switch (lookahead) {
+    switch (lookahead){
         case ID:
         match(ID);
             if(lookahead == ASGN){
                 match(ASGN);
                 expr();
+		actual_t = 4;
             } else if(lookahead == '(') {
                 match('(');
                 exprlist();
                 match(')');
             }
+	    return actual_t;
             break;
         case UINT:
         case FLTP:

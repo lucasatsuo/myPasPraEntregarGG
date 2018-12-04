@@ -2,18 +2,19 @@
 #pragma once
 #include <ctype.h>
 #include <stdio.h>
+#include <mypas.h>
 
 /* Parser to pseudocode interface*/
-void store(void);
-void recall(void);
-int macrounary(void);
-int macrobinary(void);
+void store(char*,char*);
+void recall(char*,char*);
+int macrounary(int);
+int macrobinary(int,int);
 void mklabel(size_t lblindx);
 void mklooplabel(size_t lblindx);
 void gofalse(size_t lblindx);
 void jump(size_t lblindx);
 void push(int regtype);
-void pop(int regtype); 
+void pop(char *regtype); 
 /* Pseudo ALU Instructions */
 /* Binary Operations */
 void move(void);

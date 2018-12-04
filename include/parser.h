@@ -8,10 +8,11 @@
 #include <interface.h>
 #include <pseudocode.h>
 
-size_t loopcount = 1;
+// size_t loopcount = 1;
 #define loopalloc loopcount++
 extern FILE *source;
 
+int iscompatop(int, int);
 void mypas(void);
 void header(void); 
 void body(void);
@@ -31,8 +32,8 @@ void stmtlist(void);
 void stmt(void);
 void ifstmt(void);
 int expr(void);
-int smpexpr(void);
-int factor(void);
+int smpexpr(int);
+int factor(int);
 void exprlist(void);
 void whlstmt(void);
 void repstmt(void);
