@@ -485,7 +485,7 @@ void ifstmt(void){
         /**2 b*/ mklooplabel(lblelse); /*2 b**/
         stmt();
     }
-    /**3*/ printf(".L%d:\n", lblendif); /*3**/
+    /**3*/ mklooplabel(lblendif) /*3**/
 }
 /***************************************************************************
 
