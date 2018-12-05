@@ -278,9 +278,8 @@ smpexpr:                      |                          |
 ***************************************************************************/
 int getmintype(int op){
     int mintype=0;
-    switch(mintype){
+    switch(op){
         case '+':
-
         case '-':
             mintype = 1; break;
         case NOT:
@@ -289,12 +288,26 @@ int getmintype(int op){
     return mintype;
 }
 
-int unaryop(void){
-
+/**
+* retorna o tipo da operacao unaria.
+* retorna 0 se nao for uma operacao unaria.
+*/
+int unaryop(void){ 
+    switch(lookahead){
+        case '+': 
+            match(lookahead);
+            return '+';
+        case '-':
+            match(lookahead);
+            return '-';
+        case NOT:
+            match(lookahead);
+            return NOT;
+    }
+    return 0;
 }
 
-int promote(int oldtype, int newtype){
-/* tabela de promocao
+/* tabela de promocao      
     0  1  2  3  4  newtype
 - - - - - - - - - - - - - -
 0|  0  1  2  3  4
@@ -304,27 +317,59 @@ int promote(int oldtype, int newtype){
 4| -1 -2 -2 -2  4
 oldtype
 */
+int promote(int oldtype, int newtype){
+    switch(oldtype){
+        case 0:
+            return newtype;
+        case 1:
+            switch(newtype){
+                case 0: return -1;
+                case 1: return 1;
+                case 2: return 2;
+                case 3: return 3;
+                case 4: return -2;
+            }
+        case 2:
+            switch(newtype){
+                case 0: return -1;
+                case 1: return 1;
+                case 2: return 2;
+                case 3: return 3;
+                case 4: return -2;
+            }
+        case 3:
+            switch(newtype){
+                case 0: return -1;
+                case 1: case 2: case 3: return 3;
+                case 4: return -2;
+            }
+        case 4:
+            switch(newtype){
+                case 0: return -1;
+                case 1: case 2: case 3: return -2;
+                case 4: return 4;
+            }
+    }
+    return -2;
 }
 
 int haserror = 0;
 int smpexpr(int inhertype){
-    int syntype=0; // tem que ser resolvido
+    int factor_t; // tem que ser resolvido
     /**/int isunary =/**/ unaryop();
     /**/int negation = isunary; if(negation == '+') negation=0;
     /**/int typematch = iscompatop(negation, inhertype)/**/;
 
     /**/int mintype = getmintype(negation); /**/
-
     /**/int currtype = promote(inhertype,mintype); // pode ser que tenha havido uma promocao
     /* Estas flags sao usadas para aproximar a visualizacao do codigo
     com o digrama sintatico */
-    flag_t    isneg  =  0;
     flag_t    otimes =  0;
     flag_t    oplus  =  0;
 
-    int factor_t = factor(currtype);
-
     T_begin: 
+    F_begin:
+    factor_t = factor(currtype);
     /** check for pending operations **/
     /**/if(oplus){
         push(currtype);
@@ -332,11 +377,9 @@ int smpexpr(int inhertype){
         oplus = 0;
     };/**/
 
-    F_begin:
     /**/if(negation){
-        if(typematch = iscompatop(negation,factor_t)){ // talvez seja == 
-            macrounary(negation);
-            haserror = 1;
+        if(typematch = iscompatop(negation,factor_t)){
+            macrounary(mintype);
         }
         negation = 0;
     }/**/
@@ -357,33 +400,21 @@ int smpexpr(int inhertype){
     otimes = lookahead;
     if( otimes == '*' || otimes == '/' || otimes == AND || 
         otimes == DIV || otimes == MOD) {
-        /**/typematch = iscompatop(otimes, syntype);/**/
+        /**/typematch = iscompatop(otimes, currtype);/**/
         /**/currtype = promote(currtype,factor_t);/**/ // tem que testar o valor de promote retornado
         match(otimes);
         goto F_begin;
-    }
+    } else { otimes=0; }
 
     oplus = lookahead;
     if( oplus == '+' || oplus == '-' || oplus == OR) {
-        /**/typematch = iscompatop(oplus, syntype);/**/
+        /**/typematch = iscompatop(oplus, currtype);/**/
+        /**/currtype = promote(currtype,factor_t);/**/ 
         match(oplus);
-        goto F_begin;
+        goto T_begin;
     }
 
-    switch(oplus){ // essa verificacao tem que ser feita sempre entra no if(otimes) ou if(oplus)
-                    // para saber se os operando_t sao compativeis com o tipo do operador
-        case '+':
-        case '-':
-            match(oplus);
-            syntype = 1;
-            break;
-        case OR:
-            match(oplus);
-            syntype = 4;
-            break;
-    }
-
-    return syntype;
+    return currtype;
 }
 
 /***************************************************************************
@@ -395,6 +426,8 @@ int iscompatop(int oper, int currenttype){
     switch(oper){
         case '+':
         case '-':
+        case '*':
+        case '/':
         switch(currenttype){
             case 0:
             case 1:
@@ -444,9 +477,11 @@ int factor(int inherited_t)
 	    return actual_t;
             break;
         case UINT:
+            match(lookahead);
+            return actual_t = 1;
         case FLTP:
             match(lookahead);
-            break;
+            return actual_t = 2;
         case TRUE:
         case FALSE:
             match(lookahead);
@@ -485,7 +520,7 @@ void ifstmt(void){
         /**2 b*/ mklooplabel(lblelse); /*2 b**/
         stmt();
     }
-    /**3*/ printf(".L%d:\n", lblendif); /*3**/
+    /**3*/ mklooplabel(lblendif); /*3**/
 }
 /***************************************************************************
 

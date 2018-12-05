@@ -4,9 +4,8 @@
 
 typedef struct __symtab_model__ {
 	char objname[MAXIDLEN+1];
-	char assmcod[MXASLINE+1];  // tabela com o nome da variavel com o rotulo ou o offset correspondente no assembly
-	int type; /** stands for internal types: 0 void, 1 int32, 2 flt32, 3 flt64, 4 boolean == 1 byte **/
-	// olhar as estruturas dos tipos de protocolos
+	char assmcod[MXASLINE+1];  /* tabela com o nome da variavel com o rotulo ou o offset correspondente no assembly */
+	int type; /** registra os tipos internos: 0 void, 1 int32, 2 flt32, 3 flt64, 4 boolean == 1 byte **/
 } SYMTABMODEL;
 
 #define MAXSYMTBENTRIES 0x10000
