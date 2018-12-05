@@ -14,7 +14,7 @@
  * BOOLEAN:      int8  : b-suffix regs  || 4
  */
 
-/* Pseudo Control Instructions */
+/* Pseudo instrucoes de controle */
 
 void mklooplabel(size_t lblindx){
     fprintf(object,".L%d:\n",lblindx);
@@ -23,14 +23,13 @@ void mklabel(size_t label){
 	fprintf(object, "%s%d:\n", label);
 }
 void jump(size_t lblindx){
-	fprintf(object,"\tjump .L%d\n", lblindx);
+	fprintf(object,"\tjmp .L%d\n", lblindx);
 }
 void gofalse(size_t lblindx){
-	fprintf(object,"\tgofalse .L%d\n", lblindx);
+	fprintf(object,"\tjz .L%d\n", lblindx);
 }
 
-/* Pseudo move and stack Instructions */
-/* se julgar necessario criar imov, movb, movl ...*/
+/* Pseudo instrucoes de movimentacao e controle da pilha */
 void push(int regtype){
 	char *suffix;
 	switch(regtype){
@@ -58,9 +57,9 @@ void recall(char *varoffset, char *suffix){
 	fprintf(object, "\tmov %s, %%acc%s\n", varoffset, suffix);
 }
 
-/* Pseudo ALU Instructions */
-/* Binary Operations */
-/* Adition and Subtract */
+/* Pseudo instrucoes da ULA */
+/* Operacoes binarias */
+/* Adicao e subtracao */
 void iadd(void){
 	fprintf(object, "\taddl %%accl, (%%spl)\n");
 }
@@ -82,11 +81,11 @@ void dfsub(void){
 void orb(void){ /* OR binary*/
 	fprintf(object, "\torb %%accn, (%%spn)\n");
 }
-/* Multiplication and Division */
+/* Multiplicacao e Divisao */
 void imul(void){
 	fprintf(object, "\timull %%accl, (%%spl)\n");
 }
-void idiv(void){ /* dest / src , rmdr remainder*/ // precisa ser resolvido, antes// char *rmdr 
+void idiv(void){ 
 	fprintf(object, "\tidivl %%accl, (%%spl)\n");
 }
 void fmul(void){
@@ -104,7 +103,7 @@ void dfdiv(void){
 void andb(void){
 	fprintf(object, "\tandb %%accb, (%%spb)\n");
 }
-/* Unary Operations */
+/* Operacoes unarias */
 void ineg(void){
 	fprintf(object, "\tnegl %%accl\n");
 }
@@ -119,7 +118,8 @@ void notb(void){
 }
 
 
-/* Macro Instruction: binary ops */
+/* Macro instrucoes: binary ops */
+/* Macro para criacao das instrucoes binarias */
 int macrobinary(int op, int oprndtype){
 	switch(op){
 		case '+':
@@ -211,6 +211,7 @@ int macrobinary(int op, int oprndtype){
 	return 0;
 }
 
+/* Macro para criacao das instrucoes unarias */
 int macrounary(int oprndtype){
 	switch(oprndtype){
 		case 1:
@@ -227,6 +228,7 @@ int macrounary(int oprndtype){
 	return 0;
 }
 
+/* Operacoes de conversao de tipos */
 void cvltofacc(void){
 	fprintf(object, "\tcvltof %%accl, %%accf\n");
 }

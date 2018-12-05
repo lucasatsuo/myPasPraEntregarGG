@@ -3,6 +3,7 @@
 extern size_t linenumber;
 extern size_t collummnumber;
 extern char *keyword[];
+extern char *tokens[];
 
 
 /**
@@ -37,8 +38,8 @@ void translator(char *translated, token_t original){
 	}else if(original < ID){ /* e um caractere ASCII */
 		translated[0] = original;
 		translated[1] = 0;
-	}else if(original < BEGIN){ /* e um dos tokens de tokens.h */
-		strcpy(translated, "TOKEN");
+	}else if(original < BEGIN){ /* recupera o especifico pela tabela de tokens */
+		strcpy(translated, tokens[original-ID]);
 	}else{
 		strcpy(translated, keyword[original-BEGIN]); /* senao so pode ser uma keyword */
 	}

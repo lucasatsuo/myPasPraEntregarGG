@@ -11,7 +11,7 @@ if(aoba>23)then
 			end
 	end
 else
-	seu := cu;
+	coisa := abaca;
 while aaaaa>233 do
 	begin
 	end

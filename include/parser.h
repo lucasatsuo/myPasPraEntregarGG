@@ -7,10 +7,13 @@
 #include <tokens.h>
 #include <interface.h>
 #include <pseudocode.h>
+#include <symtab.h>
 
 // size_t loopcount = 1;
 #define loopalloc loopcount++
 extern FILE *source;
+extern char lexeme[MAXIDLEN + 1];
+extern SYMTABMODEL symtab[MAXSYMTBENTRIES];
 
 int iscompatop(int, int);
 void mypas(void);
@@ -21,7 +24,7 @@ void funcmodel(void);
 void varmodel(void);
 void vargroup(void);
 void varlist(void);
-void pretype(void);
+int pretype(void);
 void procmodel(void);
 void funcmodel(void);
 void formalparms(void);

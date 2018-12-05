@@ -10,7 +10,6 @@
 
 #define MAXIDLEN 0x100
 
-extern char lexeme[MAXIDLEN + 1];
 
 char lexeme[MAXIDLEN + 1];
 

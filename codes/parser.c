@@ -65,11 +65,14 @@ void varmodel(void){
 vargroup -> varlist : pretype ;
 
 ***************************************************************************/
+int primvar,ultvar;
 void vargroup(void){
     varlist();
     match(':');
-    pretype();
+    int grouptype = pretype();
+    for (int i=primvar; i<=ultvar; i++){ symtab[i].type=grouptype; }
     match(';');
+    // for (int i=primvar; i<=ultvar; i++){ printf("%s %d\n",symtab[i].objname,symtab[i].type);}
 }
 /***************************************************************************
 
@@ -77,9 +80,12 @@ varlist -> ID { , ID }
 
 ***************************************************************************/
 void varlist(void){
+    primvar = symtab_append(lexeme,0);
     match(ID);
+    ultvar = primvar;
     while(lookahead == ','){
         match(',');
+        ultvar = symtab_append(lexeme,0);
         match(ID);
     }
 }
@@ -88,19 +94,20 @@ void varlist(void){
 pretype -> BOOLEAN | INTEGER | REAL | DOUBLE
 
 ***************************************************************************/
-void pretype(void){
+int pretype(void){
     switch(lookahead){
         case BOOLEAN:
             match(BOOLEAN);
-            break;
+            return 4;
         case INTEGER:
             match(INTEGER);
-            break;
+            return 1;
         case REAL:
             match(REAL);
-            break;
+            return 2;
         default:
             match(DOUBLE);
+            return 3;
     }
 }
 /***************************************************************************
@@ -221,7 +228,7 @@ void stmt(void){
             switch(lookahead){ /* abstrai FIRST(smpexpr) */
                 case '+': case '-': case NOT: // unary operators
                 case '(': case ID: case UINT: case FLTP:
-		case TRUE: case FALSE:
+        case TRUE: case FALSE:
                     smpexpr(0);
                 break;
                 default:
@@ -244,6 +251,9 @@ relop ->  =
 ***************************************************************************/
 int expr(void){
     /**/int typel, typer;/**/ 
+    /* a smpexpr da esquerda comeca com tipo herdado void 
+    * no caso de haver uma relop, o tipo sintetizado de smpexpr esquerdo
+    * e passado para o smpexpr da direita */
     /**/typel = smpexpr(0);/**/
     switch(lookahead){
         case '=':
@@ -253,29 +263,14 @@ int expr(void){
         case LEQ:
         case NEQ:
             match(lookahead);
-            typer = smpexpr(typel); // passa-se o tipo herdado do lado esquerdo
+            typer = smpexpr(typel);
         default:
             ;   
     }
 }
-/***************************************************************************
-
-smpexpr -> [ isneg ] fact { otimes fact } { oplus fact { otimes fact }}
-
-isneg  -> NOT | + | - 
-otimes -> AND | DIV | * | /
-oplus  -> OR | + | -
-
-                              .---<--- (  oplus ) ---<---.
-smpexpr:                      |                          |
-                              |   .-<- ( otimes ) -<-.   |
-                              |   |                  |   |
-                              |   |    +--------+    |   |
--->-.-------->--------.--->---'->-'->- | factor | ->-'->-'---->---- end
-    |                 |                +--------+
-    '->- ( isneg ) ->-'
-
-***************************************************************************/
+/**
+* retorna o tipo minimo para um operador unario
+*/
 int getmintype(int op){
     int mintype=0;
     switch(op){
@@ -289,7 +284,7 @@ int getmintype(int op){
 }
 
 /**
-* retorna o tipo da operacao unaria.
+* retorna o operador da operacao unaria.
 * retorna 0 se nao for uma operacao unaria.
 */
 int unaryop(void){ 
@@ -307,7 +302,10 @@ int unaryop(void){
     return 0;
 }
 
-/* tabela de promocao      
+/* tabela de promocao   
+dado um tipo antigo e um tipo novo, promove o tipo antigo para o tipo novo
+retornando o tipo promovido
+retorna valores negativos caso nao sejam compativeis
     0  1  2  3  4  newtype
 - - - - - - - - - - - - - -
 0|  0  1  2  3  4
@@ -353,40 +351,63 @@ int promote(int oldtype, int newtype){
     return -2;
 }
 
+/***************************************************************************
+
+smpexpr -> [ isneg ] fact { otimes fact } { oplus fact { otimes fact }}
+
+isneg  -> NOT | + | - 
+otimes -> AND | DIV | * | / | MOD
+oplus  -> OR | + | -
+
+                              .---<--- (  oplus ) ---<---.
+smpexpr:                      |                          |
+                              |   .-<- ( otimes ) -<-.   |
+                              |   |                  |   |
+                              |   |    +--------+    |   |
+-->-.-------->--------.--->---'->-'->- | factor | ->-'->-'---->---- end
+    |                 |                +--------+
+    '->- ( isneg ) ->-'
+
+***************************************************************************/
 int haserror = 0;
 int smpexpr(int inhertype){
-    int factor_t; // tem que ser resolvido
+    int factor_t;
     /**/int isunary =/**/ unaryop();
     /**/int negation = isunary; if(negation == '+') negation=0;
     /**/int typematch = iscompatop(negation, inhertype)/**/;
-
+    if(typematch<0) haserror=1;
     /**/int mintype = getmintype(negation); /**/
-    /**/int currtype = promote(inhertype,mintype); // pode ser que tenha havido uma promocao
+        /* nesse ponto pode ter ocorrido promocao do tipo herdado e o tipo
+        da operacao unaria */
+    /**/int currtype = promote(inhertype,mintype); 
     /* Estas flags sao usadas para aproximar a visualizacao do codigo
     com o digrama sintatico */
     flag_t    otimes =  0;
     flag_t    oplus  =  0;
 
     T_begin: 
-    F_begin:
+    F_begin: 
     factor_t = factor(currtype);
-    /** check for pending operations **/
-    /**/if(oplus){
-        push(currtype);
-        macrobinary(oplus,currtype);
+    /** checa se ha operacoes pendentes e executa **/
+    /**/if(oplus){ 
+        push(currtype); 
+        if(haserror == 0)
+            macrobinary(oplus,currtype);
         oplus = 0;
     };/**/
 
     /**/if(negation){
         if(typematch = iscompatop(negation,factor_t)){
-            macrounary(mintype);
+            if(haserror == 0)
+                macrounary(mintype);
         }
         negation = 0;
     }/**/
 
     /**/if(otimes){
         push(currtype);
-        macrobinary(otimes,currtype);
+        if(haserror == 0)
+            macrobinary(otimes,currtype);
         otimes = 0;
     }/**/
 
@@ -401,7 +422,8 @@ int smpexpr(int inhertype){
     if( otimes == '*' || otimes == '/' || otimes == AND || 
         otimes == DIV || otimes == MOD) {
         /**/typematch = iscompatop(otimes, currtype);/**/
-        /**/currtype = promote(currtype,factor_t);/**/ // tem que testar o valor de promote retornado
+        /**/currtype = promote(currtype,factor_t);/**/
+        if(currtype<0 || typematch<0) haserror=1;
         match(otimes);
         goto F_begin;
     } else { otimes=0; }
@@ -410,6 +432,7 @@ int smpexpr(int inhertype){
     if( oplus == '+' || oplus == '-' || oplus == OR) {
         /**/typematch = iscompatop(oplus, currtype);/**/
         /**/currtype = promote(currtype,factor_t);/**/ 
+        if(currtype<0 || typematch<0) haserror=1;
         match(oplus);
         goto T_begin;
     }
@@ -433,7 +456,7 @@ int iscompatop(int oper, int currenttype){
             case 1:
             case 2:
             case 3:
-                return 1; // tava -1, mas acho q e 1
+                return 1; 
                 break;
             default:
                 return -1;
@@ -461,25 +484,35 @@ factor ->   ID [ ASGN expr | ( exprlist ) ]
 int factor(int inherited_t)
 {
     int actual_t;
-    /* Dentro de factor que sera feita a identificacao das variaveis e constantes */
+    char variable[100];
     switch (lookahead){
         case ID:
+        strcpy(variable,lexeme);
         match(ID);
-            if(lookahead == ASGN){
+            if(lookahead == ASGN){ // a := expr
                 match(ASGN);
-                expr();
-		actual_t = 4;
+                int type = expr(); 
+                int i = symtab_lookup(variable);
+                symtab[i].type = type;
+                actual_t = type; 
             } else if(lookahead == '(') {
                 match('(');
                 exprlist();
                 match(')');
+            } else{
+                /* Salva o valor do lexeme no acumulador */
+//                symtab[symtab_lookup(lexeme)].assmcode = gencode(lexeme,type) ;
+                actual_t = symtab[symtab_lookup(lexeme)].type;
             }
-	    return actual_t;
+
+        return actual_t;
             break;
         case UINT:
             match(lookahead);
+//          symtab[symtab_lookup(lexeme)].assmcode = gencode(lexeme,type) ;
             return actual_t = 1;
         case FLTP:
+//          symtab[symtab_lookup(lexeme)].assmcode = gencode(lexeme,type) ;
             match(lookahead);
             return actual_t = 2;
         case TRUE:

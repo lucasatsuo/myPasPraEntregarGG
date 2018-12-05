@@ -1,6 +1,8 @@
 /**@<tokens.h>::**/
 
 #pragma once
+#include <string.h>
+
 
 enum {
 	ID = 1024,
@@ -11,3 +13,4 @@ enum {
 	NEQ,  // "<>"
 	GEQ,  // ">="
 };
+

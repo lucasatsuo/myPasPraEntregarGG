@@ -23,13 +23,14 @@ mypas input.pas -o saida
 #include <getopt.h>
 
 void main(int argc, char *argv[]){
-	char nomeOutput[50] = "a", *nomeInput = NULL;
+	char nomeOutput[50] = "a", *nomeInput = NULL, *extensao;
 	int opt = 0;
 
 	if(argc < 2){
 		fprintf(stderr, "Nao ha arquivos de entrada .. Finalizando\n");
 		exit(0);
 	}
+
 
 	while( (opt = getopt(argc, argv, "o:")) > 0 ) {
 		switch(opt){
@@ -39,6 +40,13 @@ void main(int argc, char *argv[]){
 
 	if ( argv[optind] != NULL ) {
 		nomeInput = argv[optind];
+	}
+
+	extensao = strchr(nomeInput, '.');
+
+	if(strcmp(extensao,".pas")!=0 && strcmp(extensao,".mypas")!=0 && strcmp(extensao,".mpas")!=0){
+		fprintf(stderr, "Extensao invalida no arquivo de entrada .. Finalizando\n");
+		exit(0);
 	}
 
 	if( (source = fopen(nomeInput, "r")) == NULL){
