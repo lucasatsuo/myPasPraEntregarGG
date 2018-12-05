@@ -165,20 +165,20 @@ int macrobinary(int op, int oprndtype){
 				default: 
 					return -1;
 			}
+			break;
 		case '/':
 			switch(oprndtype){
 				case 1: 
 					cvltofacc();
 					cvltofstk();
-					imul();pop("l"); break;
+					idiv();pop("l"); break;
 				case 2: 
-					fmul();pop("f"); break;
+					fdiv();pop("f"); break;
 				case 3:
-					dfmul();pop("df"); break;
+					dfdiv();pop("df"); break;
 				default: 
 					return -1;
 			}
-			break;			
 			break;
 		case DIV:
 			switch(oprndtype){

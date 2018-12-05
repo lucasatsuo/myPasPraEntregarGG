@@ -1,0 +1,7 @@
+	gofalse .L1
+	jump .L2
+.L1:
+	push %accl
+	addl %accl, (%spl)
+	pop %accl
+.L2:
